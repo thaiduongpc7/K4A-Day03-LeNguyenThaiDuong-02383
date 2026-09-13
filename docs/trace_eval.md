@@ -1,8 +1,8 @@
 # 📊 BÁO CÁO THU HOẠCH NGHIỆM THU BÀI LAB 3 (BƯỚC 3 — SUBMISSION ARTIFACT)
 
-> **Họ và Tên Học viên:** [Điền Họ và Tên]  
-> **Mã Sinh Viên / Mã Học viên:** [Điền MSSV]  
-> **Chủ đề Lựa chọn:** [Điền tên chủ đề đã chọn từ docs/DANH_SACH_DE_TAI.md hoặc Đề tài Mở]  
+> **Họ và Tên Học viên:** [Lê Nguyễn Thái Dương]  
+> **Mã Sinh Viên / Mã Học viên:** [02383]  
+> **Chủ đề Lựa chọn:** [Trợ lý Học vụ Sinh viên VinUni]  
 
 ---
 
@@ -10,38 +10,41 @@
 
 | Tiêu chí Đánh giá | Mức độ (1 - 5) | Giải trình chi tiết lý do chọn điểm |
 | :--- | :---: | :--- |
-| **1. Multi-step Reasoning** | / 5 | Bài toán có yêu cầu chia nhỏ nhiều bước suy luận nối tiếp nhau không? |
-| **2. Tool Interaction** | / 5 | Hệ thống có cần kết nối với MCP Server / Cơ sở dữ liệu bên ngoài không? |
-| **3. Dynamic Decision** | / 5 | Bước tiếp theo có phụ thuộc vào kết quả quan sát bước trước không? |
-| **4. Long Horizon Goal** | / 5 | Hệ thống có phải giữ mục tiêu xuyên suốt qua nhiều lượt xử lý không? |
-| **TỔNG ĐIỂM AGENTIC FIT** | **/ 20** | *Nếu tổng điểm > 12/20: Bài toán rất phù hợp triển khai Agentic System.* |
+| **1. Multi-step Reasoning** | 5 / 5 | Tình huống yêu cầu Agent phải nhận diện intent, suy luận bước tiếp theo, rồi gọi Tool phù hợp để lấy dữ liệu và tổng hợp câu trả lời cuối cùng. |
+| **2. Tool Interaction** | 5 / 5 | Hệ thống cần kết nối với MCP Server để tra cứu hồ sơ học vụ và đặt lịch hẹn, đây là dạng tác vụ chốt của ReAct Agent. |
+| **3. Dynamic Decision** | 4 / 5 | Kết quả quan sát từ Tool thay đổi hành vi tiếp theo của Agent: nếu tìm thấy sinh viên thì trả lời, nếu không thấy sẽ phản hồi NOT_FOUND và không bịa dữ liệu. |
+| **4. Long Horizon Goal** | 4 / 5 | Mục tiêu gồm nhiều lượt xử lý liên tiếp: nhận câu hỏi, quyết định Tool, thu thập dữ liệu, cuối cùng biên dịch thành phản hồi thân thiện cho học sinh. |
+| **TỔNG ĐIỂM AGENTIC FIT** | **18 / 20** | *Nếu tổng điểm > 12/20: Bài toán rất phù hợp triển khai Agentic System.* |
 
 ---
 
 ## 2. TRÍCH XUẤT KẾT QUẢ WATERFALL TRACE LOG (SAU KHI CHẠY TEST SUITE TRÊN API THẬT)
 
-> ⚠️ **YÊU CẦU NGHIỆM THU:** Mở tệp `.env` điền `GEMINI_API_KEY` (hoặc `OPENAI_API_KEY`) để kết nối LLM thật trước khi thực thi `python src/app.py --all`. Bài nộp chỉ dùng Mock Offline Provider sẽ không đạt điểm nghiệm thực tế.
+> ⚠️ **Lưu ý hiện tại:** File `.env` vẫn đang chứa giá trị placeholder (`your_gemini_api_key_here` / `your_openai_api_key_here`), nên ứng dụng đang fallback về Mock Offline Provider. Kết quả hiện có xác minh đúng luồng ReAct và MCP, nhưng chưa đạt yêu cầu live API thực tế. Cần thay bằng API key thật trước khi nộp bài theo tiêu chí nghiệm thực tế.
 
-Dán 1 đoạn trích xuất log tiêu biểu từ file `docs/trace_waterfall.json` sinh ra từ phản hồi LLM API thật:
+Dán 1 đoạn trích xuất log tiêuểu từ file `docs/trace_waterfall.json` sau khi chạy test suite ở chế độ hiện tại:
 
 ```json
 [
   {
     "step": 1,
+    "query": "Hãy đặt lịch tư vấn học vụ cho sinh viên SV2026001 vào lúc 14:00 ngày 15/09/2026 với cố vấn PGS.TS Nguyễn Văn A.",
     "action_type": "TOOL_EXECUTION",
-    "tool_name": "academic_query",
+    "tool_name": "schedule_appointment",
     "arguments": {
-      "student_id": "SV2026001"
+      "student_id": "SV2026001",
+      "datetime_str": "14:00 15/09/2026",
+      "advisor_name": "PGS.TS Nguyễn Văn A"
     },
     "observation": {
       "status": "SUCCESS",
+      "booking_id": "BK-SV2026001-99",
       "student_id": "SV2026001",
-      "data": {
-        "full_name": "Nguyễn Văn An",
-        "gpa": 3.85
-      }
+      "datetime": "14:00 15/09/2026",
+      "advisor": "PGS.TS Nguyễn Văn A",
+      "message": "Đặt lịch thành công cho sinh viên SV2026001 với PGS.TS Nguyễn Văn A vào lúc 14:00 15/09/2026."
     },
-    "latency_ms": 120.5
+    "latency_ms": 7.76
   }
 ]
 ```
@@ -50,9 +53,10 @@ Dán 1 đoạn trích xuất log tiêu biểu từ file `docs/trace_waterfall.js
 
 ## 3. TỔNG KẾT KẾT QUẢ NGHIỆM THU & NỘP BÀI
 
-- [ ] Đã điền API Key thật trong `.env` và xác nhận Agent chạy mượt mà trên LLM API thật (Gemini/OpenAI).
-- **Tổng số Test Cases đã chạy thành công:** ___ / 5 test cases.
-- **Số lượt gọi Tool qua MCP Server chính xác:** ___ lượt.
+- [ ] Đã điền API Key thật trong `.env` và xác nhận Agent chạy mượt mà trên LLM API thật (Gemini/OpenAI).  
+  > Trạng thái hiện tại: `.env` vẫn là placeholder, nên ứng dụng đang chạy ở chế độ Mock Offline. Hãy thay `your_gemini_api_key_here` hoặc `your_openai_api_key_here` bằng key thật rồi chạy lại `python src/app.py --all`.
+- **Tổng số Test Cases đã chạy thành công:** 5 / 5 test cases (ở chế độ mock hiện tại).
+- **Số lượt gọi Tool qua MCP Server chính xác:** 5 lượt.
 - **Kết quả đẩy Repo nộp bài:** [ ] Đã Commit và Push mã nguồn thành công lên GitHub cá nhân.
 
 ---
